@@ -33,6 +33,8 @@ connectStream.write({start: 'LATEST'})
   - `uri` to specify the URI to a running Connect instance
   - `parser` to specify a custom JSON parser of signature:
     `parse(String) -> Object`; defaults to `JSON.parse`
+  - `heartbeatTimeout` milliseconds to have seen no network activity before calling `heartbeatTimeoutCallback`
+  - `heartbeatTimeoutCallback` is called when timeout is reached
 
 The returned duplex stream reads and writes plain JavaScript objects. Writes
 are posted to Connect, and the responding events are emitted as plain JavaScript
