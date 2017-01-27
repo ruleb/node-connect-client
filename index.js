@@ -25,6 +25,19 @@ function connect (appKey, accessToken, _opts) {
   var protocol = apiUrl.protocol === 'https:' ? https : http
   var ended = false
 
+  var heartBeatCheckInterval
+  var lastMessageTime
+  if (opts.heartbeatTimeout) {
+    lastMessageTime = new Date().getTime()
+    heartBeatCheckInterval = setInterval(function () {
+      if ((new Date().getTime() - lastMessageTime) > opts.heartbeatTimeout) {
+        if (opts.heartbeatTimeoutCallback) {
+          opts.heartbeatTimeoutCallback()
+        }
+      }
+    }, 1000)
+  }
+
   var filter = null
   var request = null
   var currentOffset = null
@@ -91,6 +104,9 @@ function connect (appKey, accessToken, _opts) {
   }
 
   function parseJSON (data) {
+    if (opts.heartbeatTimeout) {
+      lastMessageTime = new Date().getTime()
+    }
     if (!data) {
       return
     }
@@ -124,6 +140,9 @@ function connect (appKey, accessToken, _opts) {
 
   function end (done) {
     ended = true
+    if (heartBeatCheckInterval) {
+      clearInterval(heartBeatCheckInterval)
+    }
 
     if (request) {
       request.end()
